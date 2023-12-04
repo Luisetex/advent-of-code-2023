@@ -17,7 +17,7 @@ numbers = [card.split(":")[-1].split("|") for card in cards]
 # Part A
 
 
-def get_winning_and_player_numbers(numbers_game: list[str]):
+def get_winning_and_player_numbers(numbers_game: list[str]) -> tuple[list[int], list[int], int]:
     winning_numbers, player_numbers = [
         [int(number) for number in number_list.split()] for number_list in numbers_game
     ]
@@ -34,8 +34,9 @@ def get_winning_player_numbers(winning_and_player_numbers: tuple[list[int], list
     return winning_player_numbers
 
 
-winning_numbers = [get_winning_and_player_numbers(numbers_game) for numbers_game in numbers]
-winning_player_numbers = [
+parsed_cards = [get_winning_and_player_numbers(numbers_game) for numbers_game in numbers]
+
+wins_per_card = [
     get_winning_player_numbers(get_winning_and_player_numbers(numbers_game))
     for numbers_game in numbers
 ]
@@ -46,14 +47,10 @@ def get_points(matches: list[bool]):
     return 2 ** (total_matches - 1) if total_matches > 0 else 0
 
 
-points = [get_points(matches) for matches in winning_player_numbers]
+points = [get_points(matches) for matches in wins_per_card]
 print(sum(points))
 
 # Part B
-
-parsed_cards: list[tuple[list[int], list[int], int]] = [
-    get_winning_and_player_numbers(numbers_game) for numbers_game in numbers
-]
 
 
 def process_card(
