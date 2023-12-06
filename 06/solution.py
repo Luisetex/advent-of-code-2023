@@ -34,6 +34,7 @@ print(
     )
 )
 
+
 # Part B, optimized solution
 
 
@@ -49,11 +50,9 @@ def get_best_results_optimized(duration_distance_pairs: tuple[int, int]) -> int:
     # time_pressed = race_duration +- sqrt(race_duration**2 - 4*record_distance) / 2
     # and we only need the negative solution according to the derivation
     sqrt = (race_duration**2 - 4 * record_distance) ** 0.5
-    solutions = (race_duration + sqrt) / 2, (race_duration - sqrt) / 2
     # Given it's a negative parabola, the ranges for which the solution is positive, is between the two solutions
-    range_start, range_end = int(min(solutions)), int(max(solutions))
     # Now that we have the ranges, we only need to get the range size, as that's the number of solutions that satisfy our condition
-    return range_end - range_start
+    return int((race_duration + sqrt) / 2) - int((race_duration - sqrt) / 2)
 
 
 print(get_best_results_optimized((new_parsed_list[0], new_parsed_list[1])))
