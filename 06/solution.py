@@ -52,7 +52,7 @@ def get_best_results_optimized(duration_distance_pairs: tuple[int, int]) -> int:
     solutions = (race_duration + sqrt) / 2, (race_duration - sqrt) / 2
     # Given it's a negative parabola, the ranges for which the solution is positive, is between the two solutions
     range_start, range_end = int(min(solutions)), int(max(solutions))
-    # Now that we have the ranges, we only need to get the range size
+    # Now that we have the ranges, we only need to get the range size, as that's the number of solutions that satisfy our condition
     return range_end - range_start
 
 
