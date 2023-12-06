@@ -39,7 +39,7 @@ def apply_coordinate_maps(maps: list[list[tuple[int, int, int, int]]], original_
     """
     seed = original_seed
     for coordinate_map in maps:
-        for source_start, source_end, destination_start, destination_end in coordinate_map:
+        for source_start, source_end, destination_start, _ in coordinate_map:
             if source_start <= seed <= source_end:
                 seed = destination_start + (seed - source_start)
                 break
@@ -55,70 +55,74 @@ print(min([apply_coordinate_maps(coordinate_maps, seed) for seed in parsed_seeds
 
 # Part 2
 
-# Take elements of list in pairs and create a list of tuples
-seed_pairs = list(zip(parsed_seeds[::2], parsed_seeds[1::2]))
 
-
-def get_mapped_ranges(seed_pair, maps):
-    untouched_ranges = [(seed_pair[0], seed_pair[0] + seed_pair[1] - 1)]
+def get_mapped_ranges(
+    seed_pair: tuple[int, int], coordinate_maps: list[list[tuple[int, int, int, int]]]
+):
+    unmapped_ranges = [(seed_pair[0], seed_pair[0] + seed_pair[1] - 1)]
     all_ranges = []
-    for coordinate_map in maps:
+    for coordinate_map in coordinate_maps:
         transformed_ranges = []
-        for map_range in coordinate_map:
-            transformed, untouched = map_untouched_ranges(map_range, untouched_ranges)
+        for coordinate_map_range in coordinate_map:
+            transformed, unmapped = map_unmapped_ranges(coordinate_map_range, unmapped_ranges)
             transformed_ranges.extend(transformed)
-            untouched_ranges = untouched
-        all_ranges = untouched_ranges + transformed_ranges
-        untouched_ranges = all_ranges
+            unmapped_ranges = unmapped
+        all_ranges = unmapped_ranges + transformed_ranges
+        unmapped_ranges = all_ranges
     return all_ranges
 
 
-def map_untouched_ranges(map_range, untouched_ranges):
+def map_unmapped_ranges(
+    coordinate_map_range: tuple[int, int, int, int], unmapped_ranges: list[tuple[int, int]]
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
     transformed_ranges = []
-    new_untouched_ranges = []
-    for seed_range in untouched_ranges:
-        transformed, untouched = map_coordinate_ranges(map_range, seed_range)
+    new_unmapped_ranges = []
+    for seed_range in unmapped_ranges:
+        transformed, untouched = map_coordinate_ranges(coordinate_map_range, seed_range)
         transformed_ranges.extend(transformed)
-        new_untouched_ranges.extend(untouched)
-    return transformed_ranges, new_untouched_ranges
+        new_unmapped_ranges.extend(untouched)
+    return transformed_ranges, new_unmapped_ranges
 
 
-def map_coordinate_ranges(map_range, seed_range):
+def map_coordinate_ranges(
+    coordinate_map_range: tuple[int, int, int, int], seed_range: tuple[int, int]
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
     transformed_ranges = []
-    untouched_ranges = []
-    source_start, source_end, dest_start, dest_end = map_range
+    unmapped_ranges = []
+    source_start, source_end, dest_start, dest_end = coordinate_map_range
     seed_start, seed_end = seed_range
 
     if seed_end < source_start or source_end < seed_start:
         # Seed range is completely outside the map range
-        untouched_ranges.append(seed_range)
-        return transformed_ranges, untouched_ranges
+        unmapped_ranges.append(seed_range)
+        return transformed_ranges, unmapped_ranges
     if seed_start < source_start <= seed_end <= source_end:
         # Map range overlaps the end of the seed range
         transformed_ranges.append((dest_start, dest_start + (seed_end - source_start)))
-        untouched_ranges.append((seed_start, source_start - 1))
-        return transformed_ranges, untouched_ranges
+        unmapped_ranges.append((seed_start, source_start - 1))
+        return transformed_ranges, unmapped_ranges
     if source_start <= seed_start <= source_end < seed_end:
         # Map range overlaps the start of the seed range
         transformed_ranges.append((dest_start + (seed_start - source_start), dest_end))
-        untouched_ranges.append((source_end + 1, seed_end))
-        return transformed_ranges, untouched_ranges
+        unmapped_ranges.append((source_end + 1, seed_end))
+        return transformed_ranges, unmapped_ranges
     if source_start <= seed_start and seed_end <= source_end:
         # Seed range is completely inside the map range
         transformed_ranges.append(
             (dest_start + (seed_start - source_start), dest_start + (seed_end - source_start))
         )
-        return transformed_ranges, untouched_ranges
+        return transformed_ranges, unmapped_ranges
     if seed_start < source_start and source_end < seed_end:
         # Map range is completely inside the seed range
         transformed_ranges.append((dest_start, dest_end))
-        untouched_ranges.append((seed_start, source_start - 1))
-        untouched_ranges.append((source_end + 1, seed_end))
-    return transformed_ranges, untouched_ranges
+        unmapped_ranges.append((seed_start, source_start - 1))
+        unmapped_ranges.append((source_end + 1, seed_end))
+    return transformed_ranges, unmapped_ranges
 
 
-min_per_range = []
-for seed_pair in seed_pairs:
-    mapped_ranges = get_mapped_ranges(seed_pair, coordinate_maps)
-    min_per_range.append(min([range_[0] for range_ in mapped_ranges]))
+seed_pairs = list(zip(parsed_seeds[::2], parsed_seeds[1::2]))
+min_per_range = [
+    min([range_[0] for range_ in get_mapped_ranges(seed_pair, coordinate_maps)])
+    for seed_pair in seed_pairs
+]
 print(min(min_per_range))
