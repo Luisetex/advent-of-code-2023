@@ -38,22 +38,18 @@ def get_hand_type(cards_info: tuple[str, int, dict[str, int]]) -> tuple[str, int
     cards, bid, count = cards_info
     count_values = sorted(count.values(), reverse=True)
     if count_values[0] == 5:
-        hand_type = "FIVE OF A KIND"
-    elif count_values[0] == 4:
-        hand_type = "FOUR OF A KIND"
-    elif count_values[0] == 3:
+        return (cards, bid, "FIVE OF A KIND")
+    if count_values[0] == 4:
+        return (cards, bid, "FOUR OF A KIND")
+    if count_values[0] == 3:
         if count_values[1] == 2:
-            hand_type = "FULL HOUSE"
-        else:
-            hand_type = "THREE OF A KIND"
-    elif count_values[0] == 2:
+            return (cards, bid, "FULL HOUSE")
+        return (cards, bid, "THREE OF A KIND")
+    if count_values[0] == 2:
         if count_values[1] == 2:
-            hand_type = "TWO PAIRS"
-        else:
-            hand_type = "ONE PAIR"
-    else:
-        hand_type = "HIGH CARD"
-    return (cards, bid, hand_type)
+            return (cards, bid, "TWO PAIRS")
+        return (cards, bid, "ONE PAIR")
+    return (cards, bid, "HIGH CARD")
 
 
 def card_sort_key(card_info: tuple[str, int, str]):
@@ -96,13 +92,11 @@ def get_hand_type_with_joker(cards_info: tuple[str, int, dict[str, int]]) -> tup
     if count_values[0] == 3:
         if count_values[1] == 2:
             return (cards, bid, "FULL HOUSE")
-        else:
-            return (cards, bid, "THREE OF A KIND")
+        return (cards, bid, "THREE OF A KIND")
     if count_values[0] == 2:
         if count_values[1] == 2:
             return (cards, bid, "TWO PAIRS")
-        else:
-            return (cards, bid, "ONE PAIR")
+        return (cards, bid, "ONE PAIR")
     return (cards, bid, "HIGH CARD")
 
 
