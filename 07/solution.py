@@ -34,9 +34,21 @@ def count_cards(cards_bids: list[str]) -> tuple[str, int, dict[str, int]]:
     return (cards, int(bid), count)
 
 
-def get_hand_type(cards_info: tuple[str, int, dict[str, int]]) -> tuple[str, int, str]:
+def get_hand_type(
+    cards_info: tuple[str, int, dict[str, int]], with_joker: bool = False
+) -> tuple[str, int, str]:
     cards, bid, count = cards_info
+    num_jokers = count.get("J", 0) if with_joker else 0
+
+    if "J" in count and with_joker:
+        del count["J"]
+
+    if num_jokers == 5:
+        return (cards, bid, "FIVE OF A KIND")
+
     count_values = sorted(count.values(), reverse=True)
+    count_values[0] += num_jokers
+
     if count_values[0] == 5:
         return (cards, bid, "FIVE OF A KIND")
     if count_values[0] == 4:
@@ -75,31 +87,6 @@ print(sum([index * card[1] for index, card in enumerate(sorted_cards, start=1)])
 
 CARD_LABELS = ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"]
 
-
-def get_hand_type_with_joker(cards_info: tuple[str, int, dict[str, int]]) -> tuple[str, int, str]:
-    cards, bid, count = cards_info
-    num_jokers = count.get("J", 0)
-    if num_jokers == 5:
-        return (cards, bid, "FIVE OF A KIND")
-    if "J" in count:
-        del count["J"]
-    count_values = sorted(count.values(), reverse=True)
-    count_values[0] += num_jokers
-    if count_values[0] == 5:
-        return (cards, bid, "FIVE OF A KIND")
-    if count_values[0] == 4:
-        return (cards, bid, "FOUR OF A KIND")
-    if count_values[0] == 3:
-        if count_values[1] == 2:
-            return (cards, bid, "FULL HOUSE")
-        return (cards, bid, "THREE OF A KIND")
-    if count_values[0] == 2:
-        if count_values[1] == 2:
-            return (cards, bid, "TWO PAIRS")
-        return (cards, bid, "ONE PAIR")
-    return (cards, bid, "HIGH CARD")
-
-
-type_cards = [get_hand_type_with_joker(counted_card) for counted_card in counted_cards]
+type_cards = [get_hand_type(counted_card, with_joker=True) for counted_card in counted_cards]
 sorted_cards = sort_cards(type_cards)
 print(sum([index * card[1] for index, card in enumerate(sorted_cards, start=1)]))
